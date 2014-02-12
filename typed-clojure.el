@@ -43,6 +43,7 @@
   :keymap typed-clojure-mode-map)
 
 (defun typed-clojure-check-last-form (&optional prefix)
+  "Typecheck the preceding form."
   (interactive "P")
   (if prefix
       (cider-interactive-eval-print
@@ -51,11 +52,6 @@
     (cider-interactive-eval
      (format "(clojure.core.typed/cf %s)"
 	     (cider-last-sexp)))))
-
-(defun typed-clojure-check-ns ()
-  (interactive)
-  (cider-interactive-eval-print
-   "(clojure.core.typed/check-ns)"))
 
 (defconst code " 
          (let [{:keys [delayed-errors]} (clojure.core.typed/check-ns-info)]
@@ -67,44 +63,46 @@
 			(:source env) (-> env :ns :name str))))
 	      :ok))")
 
-(defun print-handler (buffer)
-  (nrepl-make-response-handler
-   buffer
-   (lambda (buffer val)
-     (lexical-let (cb (current-buffer))
-       (with-current-buffer cider-error-buffer
-	 (let ((inhibit-read-only t)
-	       (buffer-undo-list t))
-	   (goto-char (point-max))
-	   (mapcar
-	    (lambda (x)
-	      (lexical-let ((msg    (first x))
-			    (line   (second x))
-			    (column (third x))
-			    (form   (fourth x))
-			    (source (fifth x))
-			    (ns     (sixth x)))
-		(insert (format "%s\n" msg))
-		(insert-button (format "%s:%s" line column)
-			       'action
-			       #'(lambda (y)
-				   (switch-to-buffer cb)
-				   (goto-line line)
-				   (move-to-column column)))
-		(insert (format "\n%s\n%s\n\n" form source ns))))
-	    (read val))))))
-   '()
-   '()
-   '()))
+(defun print-handler (cb buffer)
+  (lexical-let ((cb cb))
+    (nrepl-make-response-handler
+		   buffer
+		   (lambda (buffer val)
+		     (with-current-buffer buffer
+		       (let ((inhibit-read-only t)
+			     (buffer-undo-list t))
+			 (goto-char (point-max))
+			 (mapcar
+			  (lambda (x)
+			    (lexical-let ((msg    (first x))
+					  (line   (second x))
+					  (column (third x))
+					  (form   (fourth x))
+					  (source (fifth x))
+					  (ns     (sixth x)))
+			      (insert (format "%s\n" msg))
+			      (insert-button (format "%s:%s" line column)
+					     'action
+					     (lambda (y)
+					       (switch-to-buffer cb)
+					       (goto-line line)
+					       (move-to-column column)))
+			      (insert (format "\n%s\n%s\n\n" form source ns))))
+			  (read val)))))
+		   '()
+		   '()
+		   '())))
 
 (defun typed-clojure-check-ns ()
-  "Evaluate the expression preceding point and pprint its value in a popup buffer."
+  "Type check and pretty print errors for the namespace."
   (interactive)
-  (cider-tooling-eval code
-		      (print-handler (cider-popup-buffer
-				      cider-error-buffer
-				      nil))
-		      (cider-current-ns)))
+  (let ((cb (current-buffer)))
+    (cider-tooling-eval code
+			(print-handler cb
+				       (cider-popup-buffer
+					cider-error-buffer
+					nil))
+			(cider-current-ns))))
 
 (defun typed-clojure-insert-ann ()
   (interactive)
