@@ -1,7 +1,25 @@
-typed-clojure-el
+Typed-Clojure.el
 ================
 
-Utilities for Typed Clojure.
+Utilities for editing with Typed Clojure. 
+
+### Typed-Clojure-mode
+ Keyboard Shortcut    | Description                                              | Command                       
+----------------------|----------------------------------------------------------|-------------------------------
+ <kbd>C-c C-x n</kbd> | Checks the entire ns, printing errors                    | typed-clojure-check-ns        
+ <kbd>C-c C-x f</kbd> | Checks the preceding form or symbol, as in cf            | typed-clojure-check-last-form 
+ <kbd>C-c C-x i</kbd> | Inserts (ann ... []) form above the top level expression | typed-clojure-insert-ann      
+ <kbd>C-c C-x w</kbd> | Wraps the current form with (ann-form ... [])            | typed-clojure-wrap-ann-form  
+
+Dependencies
+================
+Paredit, Clojure-mode, Cider
+
+Installation
+================
+<pre>
+(require 'typed-clojure) ;; provided it's on your load-path
+</pre>
 
 License
 ================
