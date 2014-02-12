@@ -4,6 +4,7 @@ Typed-Clojure.el
 Utilities for editing with Typed Clojure. 
 
 ### Typed-Clojure-mode
+
  Keyboard Shortcut    | Description                                              | Command                       
 ----------------------|----------------------------------------------------------|-------------------------------
  <kbd>C-c C-x n</kbd> | Checks the entire ns, printing errors                    | typed-clojure-check-ns        
@@ -19,6 +20,7 @@ Installation
 ================
 <pre>
 (require 'typed-clojure) ;; provided it's on your load-path
+(add-hook 'clojure-mode-hook 'typed-clojure-mode)
 </pre>
 
 License
