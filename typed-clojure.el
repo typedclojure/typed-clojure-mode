@@ -33,7 +33,6 @@
 (require 'clojure-mode)
 (require 'paredit)
 
-;;;###autoload
 (defvar typed-clojure-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
@@ -42,6 +41,7 @@
     (define-key map (kbd "C-c C-a f") 'typed-clojure-ann-form)
     map))
 
+;;;###autoload
 (define-minor-mode typed-clojure-mode
   "Typed Clojure minor mode"
   :group 'typed-clojure
