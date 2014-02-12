@@ -33,7 +33,7 @@
 (defvar typed-clojure-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
-    (define-key map (kbd "C-c C-x f") 'typed-clojure-check-last-form)
+    (define-key map (kbd "C-c C-x f") 'typed-clojure-check-form)
     (define-key map (kbd "C-c C-x i") 'typed-clojure-insert-ann)
     (define-key map (kbd "C-c C-x w") 'typed-clojure-wrap-ann-form)
     map))
@@ -44,7 +44,7 @@
   :lighter " Typed"
   :keymap typed-clojure-mode-map)
 
-(defun typed-clojure-check-last-form (&optional prefix)
+(defun typed-clojure-check-form (&optional prefix)
   "Typecheck the preceding form."
   (interactive "P")
   (if prefix
