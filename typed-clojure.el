@@ -146,7 +146,8 @@
   (paredit-forward)
   (backward-char)
   (insert " []")
-  (backward-char))
+  (backward-char)
+  (paredit-reindent-defun))
 
 (provide 'typed-clojure)
 
