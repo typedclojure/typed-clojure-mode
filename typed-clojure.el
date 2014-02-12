@@ -37,8 +37,8 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
     (define-key map (kbd "C-c C-x f") 'typed-clojure-check-form)
-    (define-key map (kbd "C-c C-x i") 'typed-clojure-insert-ann)
-    (define-key map (kbd "C-c C-x w") 'typed-clojure-wrap-form)
+    (define-key map (kbd "C-c C-a v") 'typed-clojure-ann-var)
+    (define-key map (kbd "C-c C-a f") 'typed-clojure-ann-form)
     map))
 
 (define-minor-mode typed-clojure-mode
@@ -140,7 +140,7 @@
 					nil))
 			(cider-current-ns))))
 
-(defun typed-clojure-insert-ann ()
+(defun typed-clojure-ann-var ()
   (interactive)
   (beginning-of-defun)
   (insert (format "(%sann %s [])\n" (lowest-ns 'ann) (which-function)))
@@ -148,7 +148,7 @@
   (end-of-line)
   (backward-char 2))
 
-(defun typed-clojure-wrap-form ()
+(defun typed-clojure-ann-form ()
   (interactive)
   (lexical-let ((t (read-string "Annotate with type: ")))
     (paredit-wrap-round)
