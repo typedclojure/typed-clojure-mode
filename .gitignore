@@ -1,0 +1,10 @@
+*~
+*\#*\#
+*.\#*
+*.elc
+.cask
+elpa
+.depend
+packages/*
+TAGS
+.DS_STORE
