@@ -72,25 +72,29 @@
 (defun print-handler (buffer)
   (nrepl-make-response-handler
    buffer
-   
    (lambda (buffer val)
-     (mapcar
-      (lambda (x)
-	(let ((msg    (first x))
-	      (line   (second x))
-	      (column (third x))
-	      (form   (fourth x))
-	      (source (fifth x))
-	      (ns     (sixth x)))
-	  (cider-emit-into-popup-buffer buffer
-					(insert-button (format "%s\n%s:%s\n%s\n%s\n\n"
-							       msg
-							       line
-							       column
-							       form
-							       source
-							       ns) 'action (lambda (x) (find-file user-init-file))))))
-      (read val)))
+     (with-current-buffer cider-error-buffer
+       (let ((inhibit-read-only t)
+	     (buffer-undo-list t))
+	 (goto-char (point-max))
+	 (mapcar
+	  (lambda (x)
+	    (let ((msg    (first x))
+		  (line   (second x))
+		  (column (third x))
+		  (form   (fourth x))
+		  (source (fifth x))
+		  (ns     (sixth x)))
+	      (insert
+	       (format "%s\n"
+		       msg))
+	      (insert-button (format "%s:%s" line column) 'action (lambda (x)))
+	      (insert
+	       (format "\n%s\n%s\n\n"
+		       form
+		       source
+		       ns))))
+	  (read val)))))
    '()
    '()
    '()))
