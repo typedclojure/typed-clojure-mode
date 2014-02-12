@@ -55,10 +55,19 @@
 (defun current-alias ()
   (cider-eval-and-get-value current-alias-clj))
 
+(defun currently-referred (s)
+  (equal s (cider-eval-and-get-value (format "(first (filter #(= '%s %%) (keys (ns-refers *ns*))))" s))))
+
+(defun lowest-ns (s)
+  (interactive)
+  (if (currently-referred s)
+      ""
+    (current-alias)))
+
 (defun typed-clojure-check-form (&optional prefix)
   "Typecheck the preceding form."
   (interactive "P")
-  (let ((ca (current-alias)))
+  (let ((ca (lowest-ns 'cf)))
     (if prefix
 	(cider-interactive-eval-print
 	 (format "(%scf %s)" ca
@@ -121,7 +130,7 @@
 (defun typed-clojure-insert-ann ()
   (interactive)
   (beginning-of-defun)
-  (insert (format "(%sann %s [])\n" (current-alias) (which-function)))
+  (insert (format "(%sann %s [])\n" (lowest-ns 'ann) (which-function)))
   (previous-line)
   (end-of-line)
   (backward-char 2))
@@ -132,7 +141,7 @@
   (paredit-wrap-round)
   (beginning-of-defun)
   (forward-char)
-  (insert (format "%sann-form " (current-alias)))
+  (insert (format "%sann-form " (lowest-ns 'ann-form)))
   (beginning-of-defun)
   (paredit-forward)
   (backward-char)
