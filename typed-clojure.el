@@ -55,6 +55,27 @@
   (str al \"/\")
   \"clojure.core.typed/\")")
 
+(defconst CLJ-qualify-ann-var
+ "(let [s '%s
+        ^clojure.lang.Var v (when (symbol? s) (resolve s))]
+    (cond 
+     ; if unresolved just insert whatever is given
+     (not (var? v))
+       (str s)     
+     ; fully qualify all vars outside current namespace
+     ; also add :no-check prefix
+     (not= *ns* (.ns v))
+       (str \"^:no-check \"
+            (symbol (str (ns-name (.ns v)))
+		    (str (.sym v))))
+     :else
+       (str (name (symbol s)))))"
+)
+         
+(defun qualify-ann-var (n)
+  (cider-eval-and-get-value
+    (format CLJ-qualify-ann-var n)))
+
 (defun current-alias ()
   (cider-eval-and-get-value current-alias-clj))
 
@@ -137,11 +158,19 @@
 
 (defun typed-clojure-ann-var ()
   (interactive)
-  (beginning-of-defun)
-  (insert (format "(%sann %s [])\n" (lowest-ns 'ann) (which-function)))
-  (previous-line)
-  (end-of-line)
-  (backward-char 2))
+  (lexical-let ((t (read-string "Annotate var with type (default Any): ")))
+    (mark-sexp)
+    (kill-ring-save (region-beginning) (region-end))
+    (beginning-of-defun)
+    (insert "\n")
+    (previous-line)
+    (insert (format "(%sann " (lowest-ns 'ann)))
+					; insert correct namespace
+    (lexical-let ((sym (car kill-ring)))
+      (lexical-let ((p (qualify-ann-var sym)))
+	(insert p " " (if (= 0 (length t)) "Any" t) ")")))
+    (backward-char 1))
+    )
 
 (defun typed-clojure-ann-form ()
   (interactive)
