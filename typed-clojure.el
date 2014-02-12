@@ -66,39 +66,36 @@
 			(:column env) (if (contains? data :form) (str (:form data)) 0)
 			(:source env) (-> env :ns :name str))))
 	      :ok))")
-					; (message line column form source ns)
-
 
 (defun print-handler (buffer)
   (nrepl-make-response-handler
    buffer
    (lambda (buffer val)
-     (with-current-buffer cider-error-buffer
-       (let ((inhibit-read-only t)
-	     (buffer-undo-list t))
-	 (goto-char (point-max))
-	 (mapcar
-	  (lambda (x)
-	    (let ((msg    (first x))
-		  (line   (second x))
-		  (column (third x))
-		  (form   (fourth x))
-		  (source (fifth x))
-		  (ns     (sixth x)))
-	      (insert
-	       (format "%s\n"
-		       msg))
-	      (insert-button (format "%s:%s" line column) 'action (lambda (x)))
-	      (insert
-	       (format "\n%s\n%s\n\n"
-		       form
-		       source
-		       ns))))
-	  (read val)))))
+     (lexical-let (cb (current-buffer))
+       (with-current-buffer cider-error-buffer
+	 (let ((inhibit-read-only t)
+	       (buffer-undo-list t))
+	   (goto-char (point-max))
+	   (mapcar
+	    (lambda (x)
+	      (lexical-let ((msg    (first x))
+		    (line   (second x))
+		    (column (third x))
+		    (form   (fourth x))
+		    (source (fifth x))
+		    (ns     (sixth x)))
+		(insert (format "%s\n" msg))
+		(insert-button (format "%s:%s" line column)
+			       'action
+			       #'(lambda (y)
+				   (switch-to-buffer cb)
+				   (goto-line line)
+				   (move-to-column column)))
+		(insert (format "\n%s\n%s\n\n" form source ns))))
+	    (read val))))))
    '()
    '()
    '()))
-
 (defun typed-clojure-check-ns ()
   "Evaluate the expression preceding point and pprint its value in a popup buffer."
   (interactive)
