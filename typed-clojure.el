@@ -44,16 +44,28 @@
   :lighter " Typed"
   :keymap typed-clojure-mode-map)
 
+(defconst current-alias-clj 
+  "(if-let [[al typedns] (first (filter #(=
+                                       (find-ns 'clojure.core.typed)
+                                       (val %))
+                                     (ns-aliases *ns*)))]
+  (str al \"/\")
+  \"clojure.core.typed/\")")
+
+(defun current-alias ()
+  (cider-eval-and-get-value current-alias-clj))
+
 (defun typed-clojure-check-form (&optional prefix)
   "Typecheck the preceding form."
   (interactive "P")
-  (if prefix
-      (cider-interactive-eval-print
-       (format "(clojure.core.typed/cf %s)"
-	       (cider-last-sexp)))
-    (cider-interactive-eval
-     (format "(clojure.core.typed/cf %s)"
-	     (cider-last-sexp)))))
+  (let ((ca (current-alias)))
+    (if prefix
+	(cider-interactive-eval-print
+	 (format "(%scf %s)" ca
+		 (cider-last-sexp)))
+      (cider-interactive-eval
+       (format "(%scf %s)" ca
+	       (cider-last-sexp))))))
 
 (defconst code " 
          (let [{:keys [delayed-errors]} (clojure.core.typed/check-ns-info)]
@@ -109,7 +121,7 @@
 (defun typed-clojure-insert-ann ()
   (interactive)
   (beginning-of-defun)
-  (insert (format "(clojure.core.typed/ann %s [])\n" (which-function)))
+  (insert (format "(%sann %s [])\n" (current-alias) (which-function)))
   (previous-line)
   (end-of-line)
   (backward-char 2))
@@ -120,7 +132,7 @@
   (paredit-wrap-round)
   (beginning-of-defun)
   (forward-char)
-  (insert "clojure.core.typed/ann-form ")
+  (insert (format "%sann-form " (current-alias)))
   (beginning-of-defun)
   (paredit-forward)
   (backward-char)
