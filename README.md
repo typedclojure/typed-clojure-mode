@@ -12,10 +12,6 @@ Utilities for editing with Typed Clojure.
  <kbd>C-c C-x i</kbd> | Inserts (ann ... ) form above the top level expression | typed-clojure-insert-ann      
  <kbd>C-c C-x w</kbd> | Wraps the current form with (ann-form ... )            | typed-clojure-wrap-form  
 
-Screencast
-===============
-<img src='images/screencast-0.0.1.gif'>
-
 Dependencies
 ================
 Paredit, Clojure-mode, Cider
