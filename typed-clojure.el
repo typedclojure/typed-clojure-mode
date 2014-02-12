@@ -28,12 +28,14 @@
 (require 'button)
 (require 'cider)
 (require 'clojure-mode)
+(require 'paredit)
 
 (defvar typed-clojure-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
-    (define-key map (kbd "C-c C-x e") 'typed-clojure-check-last-form)
+    (define-key map (kbd "C-c C-x f") 'typed-clojure-check-last-form)
     (define-key map (kbd "C-c C-x i") 'typed-clojure-insert-ann)
+    (define-key map (kbd "C-c C-x w") 'typed-clojure-wrap-ann-form)
     map))
 
 (define-minor-mode typed-clojure-mode
@@ -66,32 +68,32 @@
 (defun print-handler (cb buffer)
   (lexical-let ((cb cb))
     (nrepl-make-response-handler
-		   buffer
-		   (lambda (buffer val)
-		     (with-current-buffer buffer
-		       (let ((inhibit-read-only t)
-			     (buffer-undo-list t))
-			 (goto-char (point-max))
-			 (mapcar
-			  (lambda (x)
-			    (lexical-let ((msg    (first x))
-					  (line   (second x))
-					  (column (third x))
-					  (form   (fourth x))
-					  (source (fifth x))
-					  (ns     (sixth x)))
-			      (insert (format "%s\n" msg))
-			      (insert-button (format "%s:%s" line column)
-					     'action
-					     (lambda (y)
-					       (switch-to-buffer cb)
-					       (goto-line line)
-					       (move-to-column column)))
-			      (insert (format "\n%s\n%s\n\n" form source ns))))
-			  (read val)))))
-		   '()
-		   '()
-		   '())))
+     buffer
+     (lambda (buffer val)
+       (with-current-buffer buffer
+	 (let ((inhibit-read-only t)
+	       (buffer-undo-list t))
+	   (goto-char (point-max))
+	   (mapcar
+	    (lambda (x)
+	      (lexical-let ((msg    (first x))
+			    (line   (second x))
+			    (column (third x))
+			    (form   (fourth x))
+			    (source (fifth x))
+			    (ns     (sixth x)))
+		(insert (format "%s\n" msg))
+		(insert-button (format "%s:%s" line column)
+			       'action
+			       (lambda (y)
+				 (switch-to-buffer cb)
+				 (goto-line line)
+				 (move-to-column column)))
+		(insert (format "\n%s\n%s\n\n" form source ns))))
+	    (read val)))))
+     '()
+     '()
+     '())))
 
 (defun typed-clojure-check-ns ()
   "Type check and pretty print errors for the namespace."
@@ -107,9 +109,23 @@
 (defun typed-clojure-insert-ann ()
   (interactive)
   (beginning-of-defun)
-  (insert (format "(clojure.core.typed/ann %s)\n" (which-function)))
+  (insert (format "(clojure.core.typed/ann %s [])\n" (which-function)))
   (previous-line)
-  (end-of-line))
+  (end-of-line)
+  (backward-char 2))
+
+(defun typed-clojure-wrap-ann-form ()
+  (interactive)
+  (beginning-of-defun)
+  (paredit-wrap-round)
+  (beginning-of-defun)
+  (forward-char)
+  (insert "clojure.core.typed/ann-form ")
+  (beginning-of-defun)
+  (paredit-forward)
+  (backward-char)
+  (insert " []")
+  (backward-char))
 
 (provide 'typed-clojure)
 
