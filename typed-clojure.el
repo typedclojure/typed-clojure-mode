@@ -79,11 +79,11 @@
 	   (mapcar
 	    (lambda (x)
 	      (lexical-let ((msg    (first x))
-		    (line   (second x))
-		    (column (third x))
-		    (form   (fourth x))
-		    (source (fifth x))
-		    (ns     (sixth x)))
+			    (line   (second x))
+			    (column (third x))
+			    (form   (fourth x))
+			    (source (fifth x))
+			    (ns     (sixth x)))
 		(insert (format "%s\n" msg))
 		(insert-button (format "%s:%s" line column)
 			       'action
@@ -96,6 +96,7 @@
    '()
    '()
    '()))
+
 (defun typed-clojure-check-ns ()
   "Evaluate the expression preceding point and pprint its value in a popup buffer."
   (interactive)
