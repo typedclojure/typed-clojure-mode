@@ -25,6 +25,7 @@
 
 ;;; Code:
 
+(require 'button)
 (require 'cider)
 (require 'clojure-mode)
 
@@ -56,26 +57,52 @@
   (cider-interactive-eval-print
    "(clojure.core.typed/check-ns)"))
 
-(defconst code " (require 'clojure.core.typed)
+(defconst code " 
          (let [{:keys [delayed-errors]} (clojure.core.typed/check-ns-info)]
 	    (if (seq delayed-errors)
-		[:errors
 		 (for [^Exception e delayed-errors]
 		      (let [{:keys [env] :as data} (ex-data e)]
-			{:message (.getMessage e) :line (:line env)
-			:column (:column env) :form (if (contains? data :form) (str (:form data)) 0)
-			:source (:source env) :ns (-> env :ns :name str)}))]
-	      [:ok []]))")
+			(list (.getMessage e) (:line env)
+			(:column env) (if (contains? data :form) (str (:form data)) 0)
+			(:source env) (-> env :ns :name str))))
+	      :ok))")
+					; (message line column form source ns)
 
-(defun typed-clojure-pprint-eval-sexp (form)
-  (let ((result-buffer (cider-popup-buffer cider-result-buffer nil)))
-    (cider-tooling-eval form
-                        (cider-popup-eval-out-handler result-buffer)
-                        (cider-current-ns))))
+
+(defun print-handler (buffer)
+  (nrepl-make-response-handler
+   buffer
+   
+   (lambda (buffer val)
+     (mapcar
+      (lambda (x)
+	(let ((msg    (first x))
+	      (line   (second x))
+	      (column (third x))
+	      (form   (fourth x))
+	      (source (fifth x))
+	      (ns     (sixth x)))
+	  (cider-emit-into-popup-buffer buffer
+					(insert-button (format "%s\n%s:%s\n%s\n%s\n\n"
+							       msg
+							       line
+							       column
+							       form
+							       source
+							       ns) 'action (lambda (x) (find-file user-init-file))))))
+      (read val)))
+   '()
+   '()
+   '()))
 
 (defun typed-clojure-check-ns ()
+  "Evaluate the expression preceding point and pprint its value in a popup buffer."
   (interactive)
-  (typed-clojure-pprint-eval-sexp code))
+  (cider-tooling-eval code
+		      (print-handler (cider-popup-buffer
+				      cider-error-buffer
+				      nil))
+		      (cider-current-ns)))
 
 (defun typed-clojure-insert-ann ()
   (interactive)
