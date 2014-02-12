@@ -58,14 +58,9 @@
 (defun current-alias ()
   (cider-eval-and-get-value current-alias-clj))
 
-(defun currently-referred (s)
-  (equal s (cider-eval-and-get-value (format "(first (filter #(= '%s %%) (keys (ns-refers *ns*))))" s))))
-
 (defun lowest-ns (s)
   (interactive)
-  (if (currently-referred s)
-      ""
-    (current-alias)))
+  (current-alias))
 
 (defun typed-clojure-check-form (&optional prefix)
   "Typecheck the preceding form."
