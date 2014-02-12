@@ -35,7 +35,7 @@
     (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
     (define-key map (kbd "C-c C-x f") 'typed-clojure-check-form)
     (define-key map (kbd "C-c C-x i") 'typed-clojure-insert-ann)
-    (define-key map (kbd "C-c C-x w") 'typed-clojure-wrap-ann-form)
+    (define-key map (kbd "C-c C-x w") 'typed-clojure-wrap-form)
     map))
 
 (define-minor-mode typed-clojure-mode
@@ -114,7 +114,7 @@
   (end-of-line)
   (backward-char 2))
 
-(defun typed-clojure-wrap-ann-form ()
+(defun typed-clojure-wrap-form ()
   (interactive)
   (beginning-of-defun)
   (paredit-wrap-round)
