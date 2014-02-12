@@ -150,16 +150,17 @@
 
 (defun typed-clojure-ann-form ()
   (interactive)
-  (lexical-let ((t (read-string "Annotate with type: ")))
+  (lexical-let ((t (read-string "Annotate form with type (default Any): ")))
     (paredit-wrap-round)
     (insert (format "%sann-form " (lowest-ns 'ann-form)))
     (forward-sexp)
-    (insert (concat "\n" t))
+    (insert (concat "\n" (if (= 0 (length t)) "Any" t)))
     (backward-up-list)
     (paredit-reindent-defun)
-    (forward-char)
+ ; navigate to type
     (forward-sexp)
-    (forward-char)))
+    (backward-char)
+    (backward-sexp)))
 
 (provide 'typed-clojure)
 
