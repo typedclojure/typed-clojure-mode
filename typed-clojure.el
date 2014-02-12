@@ -33,6 +33,7 @@
 (require 'clojure-mode)
 (require 'paredit)
 
+;;;###autoload
 (defvar typed-clojure-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
