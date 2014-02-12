@@ -80,7 +80,11 @@
 	       (cider-last-sexp))))))
 
 (defconst code " 
-         (let [{:keys [delayed-errors]} (clojure.core.typed/check-ns-info)]
+         (let [_ (require 'clojure.core.typed)
+               check-ns-info (find-var 'clojure.core.typed/check-ns-info)
+               _ (assert check-ns-info 
+                   \"clojure.core.typed/check-ns-info not found\")
+               {:keys [delayed-errors]} (check-ns-info)]
 	    (if (seq delayed-errors)
 		 (for [^Exception e delayed-errors]
 		      (let [{:keys [env] :as data} (ex-data e)]
