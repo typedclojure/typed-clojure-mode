@@ -1,8 +1,11 @@
-;;; typed-clojure.el --- Typed Clojure Utilities for Emacs
+;;; typed-clojure.el --- Typed Clojure minor mode for Emacs
 
 ;; Copyright © 2014 John Walker
 ;;
-;; Author: John Walker <john.lou.walker@gmail.com>
+;; Author: John Walker <john.lou.walker@gmail.com>, Ambrose Bonnaire-Sergeant <abonnairesergeant@gmail.com>
+;; URL: https://github.com/typedclojure/typed-clojure-mode
+;; Version: 1.0
+;; Package-Requires: ((paredit "22") (clojure-mode "2.1.1") (cider "0.5.0"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
