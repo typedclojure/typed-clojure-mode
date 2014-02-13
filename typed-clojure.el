@@ -167,8 +167,8 @@
     (kill-ring-save (region-beginning) (region-end))
     ; turn off mark
     (set-mark-command 0)
-    (let ((sym (car kill-ring)))      
-      (let ((p (qualify-ann-var sym)))
+    (lexical-let ((sym (car kill-ring)))      
+      (lexical-let ((p (qualify-ann-var sym)))
 	(if p
 	    (progn
 	      (beginning-of-defun)
