@@ -62,7 +62,7 @@
     (cond 
      ; if unresolved just insert whatever is given
      (not (var? v))
-       (str s)     
+       (when (symbol? s) (str s))
      ; fully qualify all vars outside current namespace
      ; also add :no-check prefix
      (not= *ns* (.ns v))
@@ -160,17 +160,26 @@
 (defun typed-clojure-ann-var ()
   (interactive)
   (lexical-let ((t (read-string "Annotate var with type (default Any): ")))
+    (ignore-errors
+      (forward-sexp)
+      (backward-sexp))
     (mark-sexp)
     (kill-ring-save (region-beginning) (region-end))
-    (beginning-of-defun)
-    (insert "\n")
-    (previous-line)
-    (insert (format "(%sann " (lowest-ns 'ann)))
-					; insert correct namespace
-    (lexical-let ((sym (car kill-ring)))
-      (lexical-let ((p (qualify-ann-var sym)))
-	(insert p " " (if (= 0 (length t)) "Any" t) ")")))
-    (backward-char 1))
+    ; turn off mark
+    (set-mark-command 0)
+    (let ((sym (car kill-ring)))      
+      (let ((p (qualify-ann-var sym)))
+	(if p
+	    (progn
+	      (beginning-of-defun)
+	      (insert "\n")
+	      (previous-line)
+	      (insert (format "(%sann " (lowest-ns 'ann)))
+	      (insert (concat p " " (if (= 0 (length t)) "Any" t) ")"))
+	      ())
+	  (error (concat "Current form is not a symbol: " sym)))
+	))
+    (backward-sexp))
     )
 
 (defun typed-clojure-ann-form ()
@@ -180,7 +189,7 @@
     (insert (format "%sann-form " (lowest-ns 'ann-form)))
     (forward-sexp)
     (insert (concat "\n" (if (= 0 (length t)) "Any" t)))
-    (backward-up-list)
+    (backward-up-list) 
     (paredit-reindent-defun)
  ; navigate to type
     (forward-sexp)
