@@ -96,7 +96,7 @@
        (format "(%scf %s)" ca
 	       (cider-last-sexp))))))
 
-(defconst code " 
+(defconst CLJ-check-ns-code " 
          (let [_ (require 'clojure.core.typed)
                check-ns-info (find-var 'clojure.core.typed/check-ns-info)
                _ (assert check-ns-info 
@@ -108,7 +108,7 @@
 			(list (.getMessage e) (:line env)
 			(:column env) (if (contains? data :form) (str (:form data)) 0)
 			(:source env) (-> env :ns :name str))))
-	      :ok))")
+	      '()))")
 
 (defun print-handler (cb buffer)
   (lexical-let ((cb cb))
@@ -120,37 +120,39 @@
 	       (buffer-undo-list t)
 	       (rd (read val)))
 	   (goto-char (point-max))
-	   (mapcar
-	    (lambda (x)
-	      (lexical-let ((msg    (first x))
-			    (line   (second x))
-			    (column (third x))
-			    (form   (fourth x))
-			    (source (fifth x))
-			    (ns     (sixth x)))
-		(insert "Type Error (")
-		(insert-button (concat (or source "NO_SOURCE_FILE")
-				       ":"
-				       (format "%s:%s" line column))
-			       'action
-			       (lambda (y)
-				 (switch-to-buffer cb)
-				 (goto-line line)
-				 (move-to-column column)))
-		(insert ") ")
-		(insert (format "%s\n" msg))
-		(insert (format "in: %s\n\n" form))
-		))
-	    rd))))
-     '()
-     '()
-     '())))
+	   (if (= 0 (length rd))
+	       (insert ":ok")
+	     (mapcar
+	      (lambda (x)
+		(lexical-let ((msg    (first x))
+			      (line   (second x))
+			      (column (third x))
+			      (form   (fourth x))
+			      (source (fifth x))
+			      (ns     (sixth x)))
+		  (insert "Type Error (")
+		  (insert-button (concat (or source "NO_SOURCE_FILE")
+					 ":"
+					 (format "%s:%s" line column))
+				 'action
+				 (lambda (y)
+				   (switch-to-buffer cb)
+				   (goto-line line)
+				   (move-to-column column)))
+		  (insert ") ")
+		  (insert (format "%s\n" msg))
+		  (insert (format "in: %s\n\n" form))
+		  )))
+	      rd))))
+       '()
+       '()
+       '())))
 
 (defun typed-clojure-check-ns ()
   "Type check and pretty print errors for the namespace."
   (interactive)
   (let ((cb (current-buffer)))
-    (cider-tooling-eval code
+    (cider-tooling-eval CLJ-check-ns-code
 			(print-handler cb
 				       (cider-popup-buffer
 					cider-error-buffer
