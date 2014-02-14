@@ -48,7 +48,7 @@
   :lighter " Typed"
   :keymap typed-clojure-mode-map)
 
-(defconst current-alias-clj 
+(defconst typed-clojure-current-alias-clj 
   "(if-let [[al typedns] (first (filter #(=
                                        (find-ns 'clojure.core.typed)
                                        (val %))
@@ -56,8 +56,8 @@
   (str al \"/\")
   \"clojure.core.typed/\")")
 
-(defconst CLJ-qualify-ann-var
- "(let [s '%s
+(defconst typed-clojure-clj-qualify-ann-var
+  "(let [s '%s
         ^clojure.lang.Var v (when (symbol? s) (resolve s))]
     (cond 
      ; if unresolved just insert whatever is given
@@ -71,23 +71,23 @@
 		    (str (.sym v))))
      :else
        (str (name (symbol s)))))"
-)
-         
-(defun qualify-ann-var (n)
+  )
+
+(defun typed-clojure-qualify-ann-var (n)
   (cider-eval-and-get-value
-    (format CLJ-qualify-ann-var n)))
+   (format typed-clojure-clj-qualify-ann-var n)))
 
-(defun current-alias ()
-  (cider-eval-and-get-value current-alias-clj))
+(defun typed-clojure-current-alias ()
+  (cider-eval-and-get-value typed-clojure-current-alias-clj))
 
-(defun lowest-ns (s)
+(defun typed-clojure-lowest-ns (s)
   (interactive)
-  (current-alias))
+  (typed-clojure-current-alias))
 
 (defun typed-clojure-check-form (&optional prefix)
   "Typecheck the preceding form."
   (interactive "P")
-  (let ((ca (lowest-ns 'cf)))
+  (let ((ca (typed-clojure-lowest-ns 'cf)))
     (if prefix
 	(cider-interactive-eval-print
 	 (format "(%scf %s)" ca
@@ -96,7 +96,7 @@
        (format "(%scf %s)" ca
 	       (cider-last-sexp))))))
 
-(defconst CLJ-check-ns-code " 
+(defconst typed-clojure-clj-check-ns-code " 
          (let [_ (require 'clojure.core.typed)
                check-ns-info (find-var 'clojure.core.typed/check-ns-info)
                _ (assert check-ns-info 
@@ -110,7 +110,7 @@
 			(:source env) (-> env :ns :name str))))
 	      '()))")
 
-(defun print-handler (cb buffer)
+(defun typed-clojure-make-print-handler (cb buffer)
   (lexical-let ((cb cb))
     (nrepl-make-response-handler
      buffer
@@ -142,21 +142,21 @@
 		  (insert ") ")
 		  (insert (format "%s\n" msg))
 		  (insert (format "in: %s\n\n" form))
-		  )))
-	      rd))))
-       '()
-       '()
-       '())))
+		  ))
+              rd)))))
+     '()
+     '()
+     '())))
 
 (defun typed-clojure-check-ns ()
   "Type check and pretty print errors for the namespace."
   (interactive)
   (let ((cb (current-buffer)))
-    (cider-tooling-eval CLJ-check-ns-code
-			(print-handler cb
-				       (cider-popup-buffer
-					cider-error-buffer
-					nil))
+    (cider-tooling-eval typed-clojure-clj-check-ns-code
+			(typed-clojure-make-print-handler cb
+                                                          (cider-popup-buffer
+                                                           cider-error-buffer
+                                                           nil))
 			(cider-current-ns))))
 
 (defun typed-clojure-ann-var ()
@@ -167,37 +167,37 @@
       (backward-sexp))
     (mark-sexp)
     (kill-ring-save (region-beginning) (region-end))
-    ; turn off mark
+                                        ; turn off mark
     (set-mark-command 0)
     (lexical-let ((sym (car kill-ring)))      
-      (lexical-let ((p (qualify-ann-var sym)))
+      (lexical-let ((p (typed-clojure-qualify-ann-var sym)))
 	(if p
 	    (progn
 	      (beginning-of-defun)
 	      (insert "\n")
 	      (previous-line)
-	      (insert (format "(%sann " (lowest-ns 'ann)))
+	      (insert (format "(%sann " (typed-clojure-lowest-ns 'ann)))
 	      (insert (concat p " " (if (= 0 (length t)) "Any" t) ")"))
 	      ())
 	  (error (concat "Current form is not a symbol: " sym)))
 	))
     (backward-sexp))
-    )
+  )
 
 (defun typed-clojure-ann-form ()
   (interactive)
   (lexical-let ((t (read-string "Annotate form with type (default Any): ")))
     (paredit-wrap-round)
-    (insert (format "%sann-form " (lowest-ns 'ann-form)))
+    (insert (format "%sann-form " (typed-clojure-lowest-ns 'ann-form)))
     (forward-sexp)
     (insert (concat "\n" (if (= 0 (length t)) "Any" t)))
     (backward-up-list) 
     (paredit-reindent-defun)
- ; navigate to type
+                                        ; navigate to type
     (forward-sexp)
     (backward-char)
     (backward-sexp)))
 
 (provide 'typed-clojure-mode)
 
-;;; typed-clojure.el ends here
+;;; typed-clojure-mode.el ends here
