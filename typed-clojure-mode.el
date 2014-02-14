@@ -1,4 +1,4 @@
-;;; typed-clojure.el --- Typed Clojure minor mode for Emacs
+;;; typed-clojure-mode.el --- Typed Clojure minor mode for Emacs
 
 ;; Copyright © 2014 John Walker
 ;;
@@ -198,6 +198,6 @@
     (backward-char)
     (backward-sexp)))
 
-(provide 'typed-clojure)
+(provide 'typed-clojure-mode)
 
 ;;; typed-clojure.el ends here
