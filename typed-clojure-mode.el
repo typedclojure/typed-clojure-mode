@@ -5,7 +5,7 @@
 ;; Author: John Walker <john.lou.walker@gmail.com>, Ambrose Bonnaire-Sergeant <abonnairesergeant@gmail.com>
 ;; URL: https://github.com/typedclojure/typed-clojure-mode
 ;; Version: 1.0
-;; Package-Requires: ((paredit "22") (clojure-mode "2.1.1") (cider "0.5.0"))
+;; Package-Requires: ((clojure-mode "2.1.1") (cider "0.5.0"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@
 (require 'button)
 (require 'cider)
 (require 'clojure-mode)
-(require 'paredit)
 
 (defvar typed-clojure-mode-map
   (let ((map (make-sparse-keymap)))
@@ -187,12 +186,15 @@
 (defun typed-clojure-ann-form ()
   (interactive)
   (lexical-let ((t (read-string "Annotate form with type (default Any): ")))
-    (paredit-wrap-round)
-    (insert (format "%sann-form " (typed-clojure-lowest-ns 'ann-form)))
-    (forward-sexp)
-    (insert (concat "\n" (if (= 0 (length t)) "Any" t)))
-    (backward-up-list) 
-    (paredit-reindent-defun)
+    (save-excursion
+      (insert (format "(%sann-form " (typed-clojure-lowest-ns 'ann-form)))
+      (forward-sexp)
+      (insert (format "%s)" (concat "\n" (if (= 0 (length t)) "Any" t))))
+      (backward-up-list) )
+    (save-excursion
+      (mark-defun)
+      (indent-region (region-beginning)
+                     (region-end)))
                                         ; navigate to type
     (forward-sexp)
     (backward-char)
