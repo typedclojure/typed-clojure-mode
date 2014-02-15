@@ -186,19 +186,19 @@
 (defun typed-clojure-ann-form ()
   (interactive)
   (lexical-let ((t (read-string "Annotate form with type (default Any): ")))
+    (ignore-errors
+      (forward-sexp)
+      (backward-sexp))
     (save-excursion
       (insert (format "(%sann-form " (typed-clojure-lowest-ns 'ann-form)))
       (forward-sexp)
-      (insert (format "%s)" (concat "\n" (if (= 0 (length t)) "Any" t))))
-      (backward-up-list) )
+      (insert (format "%s)" (concat " " (if (= 0 (length t)) "Any" t))))
+      (backward-up-list))
     (save-excursion
       (mark-defun)
-      (indent-region (region-beginning)
-                     (region-end)))
-                                        ; navigate to type
-    (forward-sexp)
-    (backward-char)
-    (backward-sexp)))
+      ;; (indent-region (region-beginning)
+      ;;                (region-end))
+      )))
 
 (provide 'typed-clojure-mode)
 
