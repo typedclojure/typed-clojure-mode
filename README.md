@@ -18,8 +18,10 @@ Paredit, Clojure-mode, Cider
 
 Installation
 ================
+
+Install via [MELPA](http://melpa.milkbox.net/#/typed-clojure-mode).
+
 <pre>
-(require 'typed-clojure) ;; provided it's on your load-path
 (add-hook 'clojure-mode-hook 'typed-clojure-mode)
 </pre>
 
