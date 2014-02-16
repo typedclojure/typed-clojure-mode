@@ -1,4 +1,4 @@
-Typed-Clojure.el
+Typed-Clojure-Mode
 ================
 
 Utilities for editing with Typed Clojure. 
