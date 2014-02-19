@@ -14,7 +14,7 @@ Utilities for editing with Typed Clojure.
 
 Dependencies
 ================
-Paredit, Clojure-mode, Cider
+Clojure-mode, Cider
 
 Installation
 ================
