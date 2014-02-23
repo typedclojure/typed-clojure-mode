@@ -136,12 +136,11 @@
 				 'action
 				 (lambda (y)
 				   (switch-to-buffer cb)
-				   (goto-line line)
+                                   (forward-line (- line (line-number-at-pos)))
 				   (move-to-column column)))
 		  (insert ") ")
 		  (insert (format "%s\n" msg))
-		  (insert (format "in: %s\n\n" form))
-		  ))
+		  (insert (format "in: %s\n\n" form))))
               rd)))))
      '()
      '()
@@ -174,7 +173,7 @@
 	    (progn
 	      (beginning-of-defun)
 	      (insert "\n")
-	      (previous-line)
+              (forward-line -1)
 	      (insert (format "(%sann " (typed-clojure-lowest-ns 'ann)))
 	      (insert (concat p " " (if (= 0 (length t)) "Any" t) ")"))
 	      ())
