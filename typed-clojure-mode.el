@@ -42,7 +42,11 @@
 
 ;;;###autoload
 (define-minor-mode typed-clojure-mode
-  "Typed Clojure minor mode"
+  "The official minor mode for editing Typed Clojure. Provides
+namespace typechecking, error navigation, display of type data,
+and annotation snippets.
+
+\\{typed-clojure-mode-map}"
   :group 'typed-clojure
   :lighter " Typed"
   :keymap typed-clojure-mode-map)
