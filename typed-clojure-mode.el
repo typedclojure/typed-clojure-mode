@@ -160,14 +160,7 @@
 (defun typed-clojure-ann-var ()
   (interactive)
   (lexical-let ((t (read-string "Annotate var with type (default Any): ")))
-    (ignore-errors
-      (forward-sexp)
-      (backward-sexp))
-    (mark-sexp)
-    (kill-ring-save (region-beginning) (region-end))
-                                        ; turn off mark
-    (set-mark-command 0)
-    (lexical-let ((sym (car kill-ring)))      
+    (lexical-let ((sym (thing-at-point 'symbol)))      
       (lexical-let ((p (typed-clojure-qualify-ann-var sym)))
 	(if p
 	    (progn
@@ -177,10 +170,8 @@
 	      (insert (format "(%sann " (typed-clojure-lowest-ns 'ann)))
 	      (insert (concat p " " (if (= 0 (length t)) "Any" t) ")"))
 	      ())
-	  (error (concat "Current form is not a symbol: " sym)))
-	))
-    (backward-sexp))
-  )
+	  (error (concat "Current form is not a symbol: " sym)))))
+    (backward-sexp)))
 
 (defun typed-clojure-ann-form ()
   (interactive)
