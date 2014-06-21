@@ -1,7 +1,10 @@
 Typed-Clojure-Mode
 ================
 
-Utilities for editing with Typed Clojure. 
+
+<a href='http://typedclojure.org'><img src='images/part-of-typed-clojure-project.png'></a>
+
+The official Typed Clojure Emacs plugin.
 
 ### Typed-Clojure-mode
 
