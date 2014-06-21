@@ -6,6 +6,15 @@ Typed-Clojure-Mode
 
 The official Typed Clojure Emacs plugin.
 
+Installation
+================
+
+Install via [MELPA](http://melpa.milkbox.net/#/typed-clojure-mode).
+
+<pre>
+(add-hook 'clojure-mode-hook 'typed-clojure-mode)
+</pre>
+
 ### Typed-Clojure-mode
 
  Keyboard Shortcut    | Description                                              | Command                       
@@ -18,15 +27,6 @@ The official Typed Clojure Emacs plugin.
 Dependencies
 ================
 Clojure-mode, Cider
-
-Installation
-================
-
-Install via [MELPA](http://melpa.milkbox.net/#/typed-clojure-mode).
-
-<pre>
-(add-hook 'clojure-mode-hook 'typed-clojure-mode)
-</pre>
 
 License
 ================
