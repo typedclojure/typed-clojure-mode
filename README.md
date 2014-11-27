@@ -4,7 +4,8 @@ Typed-Clojure-Mode
 
 <a href='http://typedclojure.org'><img src='images/part-of-typed-clojure-project.png'></a>
 
-The official Typed Clojure Emacs plugin.
+The official Typed Clojure Emacs minor mode for Cider ``0.8.1`` and
+higher.
 
 Installation
 ================
