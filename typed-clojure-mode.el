@@ -4,7 +4,7 @@
 ;;
 ;; Author: John Walker <john.lou.walker@gmail.com>, Ambrose Bonnaire-Sergeant <abonnairesergeant@gmail.com>
 ;; URL: https://github.com/typedclojure/typed-clojure-mode
-;; Version: 1.1
+;; Version: 1.1.0
 ;; Package-Requires: ((clojure-mode "2.1.1") (cider "0.8.1"))
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; Provides utility functions for Typed Clojure
+;; Provides helpers for getting things done in Typed Clojure
 
 ;;; Code:
 
@@ -79,7 +79,7 @@ and annotation snippets.
 
 (defun typed-clojure-read-eval-sync (s)
   (read (nrepl-dict-get (nrepl-sync-request:eval s)
-			"value")))
+                        "value")))
 
 (defun typed-clojure-qualify-ann-var (n)
   (typed-clojure-read-eval-sync
@@ -89,14 +89,19 @@ and annotation snippets.
   (typed-clojure-read-eval-sync
    typed-clojure-current-alias-clj))
 
-(defun typed-clojure-check-form (&optional prefix)
-  "Typecheck the preceding form."
-  (interactive "P")
-  (let* ((ca (typed-clojure-current-alias))
-         (cmd (format "(%scf %s)" ca (cider-last-sexp))))
-    (cider-interactive-eval
-     cmd
-     (when prefix (cider-eval-print-handler)))))
+(defconst typed-clojure-check-form-str
+  "(do
+     (require 'clojure.core.typed)
+     (if-let [res (seq (:delayed-errors (clojure.core.typed/check-form-info '%s)))]
+        (for [^Exception e res]
+             (let [{:keys [env] :as data} (ex-data e)]
+               (list (first (clojure.string/split (.getMessage e) #\"\nHint\")) \"\n\"
+                     (if (contains? data :form)
+                         (str (:form data))
+                       0) \"\n\")))
+        (with-out-str (clojure.pprint/write (clojure.core.typed/cf %s)))))")
+
+
 
 (defconst typed-clojure-clj-check-ns-code "
          (let [_ (require 'clojure.core.typed)
@@ -112,7 +117,7 @@ and annotation snippets.
                         (:source env) (-> env :ns :name str))))
               '()))")
 
-(defun typed-clojure-make-print-handler (cb buffer)
+(defun typed-clojure-make-check-form-handler (cb buffer)
   (lexical-let ((cb cb))
     (nrepl-make-response-handler
      buffer
@@ -149,12 +154,62 @@ and annotation snippets.
      '()
      '())))
 
+(defun typed-clojure-make-check-ns-handler (cb buffer)
+  (lexical-let ((cb cb))
+    (nrepl-make-response-handler
+     buffer
+     (lambda (buffer val)
+       (with-current-buffer buffer
+         (let ((inhibit-read-only t)
+               (buffer-undo-list t)
+               (rd (read val)))
+           (goto-char (point-max))
+           (if (= 0 (length rd))
+               (insert ":ok")
+             (mapcar
+              (lambda (x)
+                (lexical-let ((msg    (first x))
+                              (line   (second x))
+                              (column (third x))
+                              (form   (fourth x))
+                              (source (fifth x))
+                              (ns     (sixth x)))
+                  (insert "Type Error (")
+                  (insert-button (concat (or source "NO_SOURCE_FILE")
+                                         ":"
+                                         (format "%s:%s" line column))
+                                 'action
+                                 (lambda (y)
+                                   (switch-to-buffer cb)
+                                   (forward-line (- line (line-number-at-pos)))
+                                   (move-to-column column)))
+		  (insert ")\n")
+                  (insert (format "%s\n\n\n" msg))))
+              rd)))))
+     '()
+     '()
+     '())))
+
 (defun typed-clojure-check-ns ()
   "Type check and pretty print errors for the namespace."
   (interactive)
   (let ((cb (current-buffer)))
     (cider-tooling-eval typed-clojure-clj-check-ns-code
-                        (typed-clojure-make-print-handler cb
+                        (typed-clojure-make-check-ns-handler cb
+							     (cider-popup-buffer
+							      cider-error-buffer
+							      nil))
+                        (cider-current-ns))))
+
+(defun typed-clojure-check-form (&optional prefix)
+  "Typecheck the preceding form."
+  (interactive "P")
+  (let ((cb (current-buffer))
+        (last-form (cider-last-sexp)))
+    (cider-tooling-eval (format typed-clojure-check-form-str
+                                last-form
+                                last-form)
+                        (typed-clojure-make-check-form-handler cb
                                                           (cider-popup-buffer
                                                            cider-error-buffer
                                                            nil))
