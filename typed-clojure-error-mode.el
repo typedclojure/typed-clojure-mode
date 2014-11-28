@@ -27,7 +27,7 @@
 
 (require 'cider-interaction)
 
-(setq typed-clojure-error-mode-keywords
+(defvar typed-clojure-error-mode-keywords
       '(("^Type Error\\|Internal Error" . font-lock-constant-face)
 	("^Hint:\\|^in: \\|^with expected type:$\\|^Arguments:$\\|^Domains:$\\|^Ranges:$" . font-lock-variable-name-face)))
 
