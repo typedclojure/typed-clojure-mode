@@ -36,10 +36,10 @@
 
 (defvar typed-clojure-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-x n") 'typed-clojure-check-ns)
-    (define-key map (kbd "C-c C-x f") 'typed-clojure-check-form)
-    (define-key map (kbd "C-c C-a v") 'typed-clojure-ann-var)
-    (define-key map (kbd "C-c C-a f") 'typed-clojure-ann-form)
+    (define-key map (kbd "C-c C-x n") #'typed-clojure-check-ns)
+    (define-key map (kbd "C-c C-x f") #'typed-clojure-check-form)
+    (define-key map (kbd "C-c C-a v") #'typed-clojure-ann-var)
+    (define-key map (kbd "C-c C-a f") #'typed-clojure-ann-form)
     map))
 
 ;;;###autoload
